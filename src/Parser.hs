@@ -41,9 +41,7 @@ parseString _ =
 indices = concat [[(x, y, ' ') | x <- [0..2]] | y <- [0..2]]
 
 fillMatrix :: Move -> [(Integer, Integer, Char)] -> [(Integer, Integer, Char)]
---fillMatrix (Move _ _ _ Parser.Empty) acc =
 fillMatrix Parser.Empty acc =
---    putStrLn "last"
     acc
 fillMatrix move acc =
     fillMatrix previousTurn newAcc
@@ -60,6 +58,21 @@ changeElement idx newElem acc =
         (beginning, _:ending) = Data.List.splitAt idx acc
         newAcc = beginning ++ newElem : ending
 
+finalMove :: String -> Either String (Maybe (Int, Int, Char))
+finalMove msg =
+    Right (makeAMove matrix)
+    where
+        matrix = solve msg
+
+
+
+
+
+test :: Int -> Either String (Maybe (Int, Int, Char))
+test 1 = Left "Awesome!"
+test 2 = Right (Just (1,2,'x'))
+
+
 solve :: String -> [(Integer, Integer, Char)]
 solve message =
     matrix
@@ -72,6 +85,13 @@ position i xs =
     case i `elemIndex` xs of
         Just n  -> n
         Nothing -> error "Could not determine position."
+
+makeAMove :: [(Integer, Integer, Char)] -> Maybe (Integer, Integer, Char)
+makeAMove [] = Nothing
+makeAMove (elem:restElem) =
+    case elem of
+        (x, y, ' ') -> Just (x, y, 'x')
+        _ -> makeAMove restElem
 
 createMove :: String -> (Move, String)
 createMove rest =
