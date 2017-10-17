@@ -3,7 +3,6 @@ import Data.List        -- elemIndex
 import Data.Sequence    -- update
 import Data.Foldable    -- toList
 
-
 data Point = Point (Integer, Integer)
   deriving Show
 
@@ -14,7 +13,7 @@ data Move = Empty | Move { point  :: Point
                          } deriving Show
 
 m :: String
-m = "{\"c\": {\"0\": 1, \"1\": 1}, \"v\": \"x\", \"id\": \"Uw\", \"prev\": {\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"Uw\"}}"
+m = "{\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\", \"prev\": {\"c\": {\"0\": 2, \"1\": 2}, \"v\": \"x\", \"id\": \"FLwNCvOVREEuQhWEMALIgzWo\", \"prev\": {\"c\": {\"0\": 0, \"1\": 0}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\"}}}"
 
 parsePoint :: String -> (Point, String)
 parsePoint ('{':rest) =
@@ -39,10 +38,11 @@ parseString ('\"':rest) =
 parseString _ =
   error "String expected"
 
-indices = concat [[(x, y, ' ') | x <- [1..3]] | y <- [1..3]]
+indices = concat [[(x, y, ' ') | x <- [0..2]] | y <- [0..2]]
 
 fillMatrix :: Move -> [(Integer, Integer, Char)] -> [(Integer, Integer, Char)]
-fillMatrix (Move _ _ _ Parser.Empty) acc =
+--fillMatrix (Move _ _ _ Parser.Empty) acc =
+fillMatrix Parser.Empty acc =
 --    putStrLn "last"
     acc
 fillMatrix move acc =
@@ -50,32 +50,28 @@ fillMatrix move acc =
     where
         Point (x, y) = point move
         sym = symbol move
-        idx = case elemIndex (x, y, ' ') (takeWhile (<= (x, y, ' ')) acc) of
-            Just n  -> n
-            Nothing -> error "Could not extract index."
-        newAcc = toList(update idx (x, y, sym) $ fromList acc)
+        idx = position (x, y, ' ') acc
+        newAcc = changeElement idx (x, y, sym) acc
         previousTurn = prev move
---        putStrLn "full"
 
-
-
-
-solve :: String -> IO ()
-solve rest =
-    putStrLn "full"
+changeElement idx newElem acc =
+    newAcc
     where
-        (move, rest) = createMove rest
+        (beginning, _:ending) = Data.List.splitAt idx acc
+        newAcc = beginning ++ newElem : ending
+
+solve :: String -> [(Integer, Integer, Char)]
+solve message =
+    matrix
+    where
+        (move, rest) = createMove message
         matrix = fillMatrix move indices
 
-test :: [(Integer, Integer, Char)]
-test =
-    [(1,2,'c'),(1,2,'d')]
-
---createMatrix :: Move -> [[Char]]
---createMatrix move =
---  Point (x, y) = point Move
---
---takePoint' ::
+position :: Eq a => a -> [a] -> Int
+position i xs =
+    case i `elemIndex` xs of
+        Just n  -> n
+        Nothing -> error "Could not determine position."
 
 createMove :: String -> (Move, String)
 createMove rest =
@@ -114,3 +110,5 @@ turboParse' ('\"':'p':'r':'e':'v':'\"':':':' ':rest) (Move iniPoint ini1 ini2 Pa
     (newMove, rest1) = createMove rest
 turboParse' rest (Move iniPoint ini1 ini2 prevMove) =
   ((Move iniPoint ini1 ini2 prevMove), rest)
+
+
