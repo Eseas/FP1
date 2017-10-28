@@ -2,18 +2,8 @@ module Parser where
 import Data.List        -- elemIndex
 import Data.Sequence    -- update
 import Data.Foldable    -- toList
-
-data Point = Point (Integer, Integer)
-  deriving Show
-
-data Move = Empty | Move { point  :: Point
-                         , symbol :: Char
-                         , id     :: String
-                         , prev   :: Move
-                         } deriving Show
-
-m :: String
-m = "{\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\", \"prev\": {\"c\": {\"0\": 2, \"1\": 2}, \"v\": \"x\", \"id\": \"FLwNCvOVREEuQhWEMALIgzWo\", \"prev\": {\"c\": {\"0\": 0, \"1\": 0}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\"}}}"
+import Matrixer
+import Entities
 
 parsePoint :: String -> (Point, String)
 parsePoint ('{':rest) =
@@ -22,11 +12,11 @@ parsePoint ('{':rest) =
     (first, ',':' ':rest1) = parseInt rest
     (second, '}':',':' ':rest2) = parseInt rest1
 
-parseInt :: String -> (Integer, String)
+parseInt :: String -> (Int, String)
 parseInt ('\"':_:'\"':':':' ':value:rest) =
   (read [value], rest)
 parseInt _ =
-  error "Integer expected"
+  error "Int expected"
 
 parseString :: String -> (String, String)
 parseString ('\"':rest) =
@@ -38,55 +28,7 @@ parseString ('\"':rest) =
 parseString _ =
   error "String expected"
 
-indices = concat [[(x, y, ' ') | x <- [0..2]] | y <- [0..2]]
-
-fillMatrix :: Move -> [(Integer, Integer, Char)] -> [(Integer, Integer, Char)]
-fillMatrix Parser.Empty acc =
-    acc
-fillMatrix move acc =
-    fillMatrix previousTurn newAcc
-    where
-        Point (x, y) = point move
-        sym = symbol move
-        idx = position (x, y, ' ') acc
-        newAcc = changeElement idx (x, y, sym) acc
-        previousTurn = prev move
-
-changeElement idx newElem acc =
-    newAcc
-    where
-        (beginning, _:ending) = Data.List.splitAt idx acc
-        newAcc = beginning ++ newElem : ending
-
-finalMove :: String -> Either String (Maybe (Int, Int, Char))
-finalMove msg =
-    Right (makeAMove matrix)
-    where
-        matrix = solve msg
-
-
-
-
-
-test :: Int -> Either String (Maybe (Int, Int, Char))
-test 1 = Left "Awesome!"
-test 2 = Right (Just (1,2,'x'))
-
-
-solve :: String -> [(Integer, Integer, Char)]
-solve message =
-    matrix
-    where
-        (move, rest) = createMove message
-        matrix = fillMatrix move indices
-
-position :: Eq a => a -> [a] -> Int
-position i xs =
-    case i `elemIndex` xs of
-        Just n  -> n
-        Nothing -> error "Could not determine position."
-
-makeAMove :: [(Integer, Integer, Char)] -> Maybe (Integer, Integer, Char)
+makeAMove :: [(Int, Int, Char)] -> Maybe (Int, Int, Char)
 makeAMove [] = Nothing
 makeAMove (elem:restElem) =
     case elem of
@@ -97,7 +39,7 @@ createMove :: String -> (Move, String)
 createMove rest =
   (move, rest1)
   where
-    (move, rest1) = turboParse' rest (Move (Point (0,0)) 'e' "" Parser.Empty)
+    (move, rest1) = turboParse' rest (Move (Point (0,0)) 'e' "" Entities.Empty)
 
 turboParse' :: String -> Move -> (Move, String)
 -- init move
@@ -124,11 +66,9 @@ turboParse' ('\"':'i':'d':'\"':':':' ':rest) (Move iniPoint ini1 ini2 prevMove) 
     (stringValue, rest1) = parseString rest
     newMove = Move iniPoint ini1 stringValue prevMove
 -- prev
-turboParse' ('\"':'p':'r':'e':'v':'\"':':':' ':rest) (Move iniPoint ini1 ini2 Parser.Empty) =
+turboParse' ('\"':'p':'r':'e':'v':'\"':':':' ':rest) (Move iniPoint ini1 ini2 Entities.Empty) =
   ((Move iniPoint ini1 ini2 newMove), rest1)
   where
     (newMove, rest1) = createMove rest
 turboParse' rest (Move iniPoint ini1 ini2 prevMove) =
   ((Move iniPoint ini1 ini2 prevMove), rest)
-
-
