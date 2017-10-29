@@ -5,9 +5,32 @@ import Data.Foldable    -- toList
 import Matrixer
 import Entities
 
+createMove :: String -> (Move, String)
+createMove rest =
+  (move, rest1)
+  where
+    (move, rest1) = turboParse' rest (Move (Point (0,0)) 'e' "" Entities.Empty)
+
+createMove2 :: String -> Either String (Move, String)
+createMove2 rest =
+  result
+  where
+    result = case parse rest (Move (Point (0,0)) 'e' "" Entities.Empty) of
+      Right (move, rest1) ->
+        Right (move, rest1)
+      Left errorMsg ->
+        Left errorMsg
+
 parsePoint :: String -> (Point, String)
 parsePoint ('{':rest) =
   (Point (first, second), rest2)
+  where
+    (first, ',':' ':rest1) = parseInt rest
+    (second, '}':',':' ':rest2) = parseInt rest1
+
+parsePoint2 :: String -> Either String (Point, String)
+parsePoint2 ('{':rest) =
+  Right (Point (first, second), rest2)
   where
     (first, ',':' ':rest1) = parseInt rest
     (second, '}':',':' ':rest2) = parseInt rest1
@@ -17,6 +40,12 @@ parseInt ('\"':_:'\"':':':' ':value:rest) =
   (read [value], rest)
 parseInt _ =
   error "Int expected"
+
+parseInt2 :: String -> Either String (Int, String)
+parseInt2 ('\"':_:'\"':':':' ':value:rest) =
+  Right (read [value], rest)
+parseInt2 _ =
+  Left "parseInt failed. Must match: '\"':_:'\"':':':' ':value:rest"
 
 parseString :: String -> (String, String)
 parseString ('\"':rest) =
@@ -28,18 +57,78 @@ parseString ('\"':rest) =
 parseString _ =
   error "String expected"
 
-makeAMove :: [(Int, Int, Char)] -> Maybe (Int, Int, Char)
-makeAMove [] = Nothing
-makeAMove (elem:restElem) =
-    case elem of
-        (x, y, ' ') -> Just (x, y, 'x')
-        _ -> makeAMove restElem
+parseString2 :: String -> Either String (String, String)
+parseString2 ('\"':rest) =
+  let
+      iAsStr = takeWhile (/= '\"') rest
+      strLenght = Data.Foldable.length iAsStr + 3
+      rest1 = Data.List.drop strLenght rest
+      in Right (iAsStr, rest1)
+parseString2 _ =
+  Left "String expected"
 
-createMove :: String -> (Move, String)
-createMove rest =
-  (move, rest1)
+parse :: String -> Move -> Either String (Move, String)
+parse rest0 (Move iniPoint ini1 ini2 prevMove) =
+  case updatedMove of
+      Left updatedMove  -> Left updatedMove
+      Right updatedMove -> Right updatedMove
   where
-    (move, rest1) = turboParse' rest (Move (Point (0,0)) 'e' "" Entities.Empty)
+    updatedMove = case rest0 of
+      ('{':rest) ->
+        parse rest (Move iniPoint ini1 ini2 prevMove)
+      ('\"':'c':'\"':':':' ':rest) ->
+        case parsePoint2 rest of
+          Left msg ->
+            Left msg
+          Right (newPoint, rest1) ->
+            parse rest1 newMove
+            where
+              newMove = Move newPoint 'e' "" prevMove
+      ('\"':'v':'\"':':':' ':rest) ->
+        case parseString2 rest of
+          Left msg ->
+            Left msg
+          Right ([charValue], rest1) ->
+            parse rest1 newMove
+              where
+                newMove = Move iniPoint charValue "" prevMove
+      ('\"':'i':'d':'\"':':':' ':rest) ->
+        case parseString2 rest of
+          Left msg ->
+            Left msg
+          Right (stringValue, rest1) ->
+            parse rest1 newMove
+              where
+                newMove = Move iniPoint ini1 stringValue prevMove
+      ('\"':'p':'r':'e':'v':'\"':':':' ':rest) ->
+        case createMove2 rest of
+          Left msg ->
+            Left msg
+          Right (newMove, rest1) ->
+            parse rest1 (Move iniPoint ini1 ini2 newMove)
+      rest ->
+        Right ((Move iniPoint ini1 ini2 prevMove), rest)
+-- parse last
+--   return what have
+
+turboParse2' :: String -> Move -> Either String (Move, String)
+turboParse2' ('\"':'c':'\"':':':' ':rest) (Move iniPoint ini1 ini2 prevMove) =
+  -- turboParse' rest1 newMove
+  case result of
+    Left errorMsg3 ->
+      Left "Fuck"
+    Right goodResult ->
+      Right goodResult
+  where
+    result = case parsePoint2 rest of
+      Right (point, rest1) ->
+        turboParse2' rest1 newMove
+        where
+          newMove = Move point 'e' "" prevMove
+      Left errorMsg ->
+        Left "fuck2"
+turboParse2' _ _ =
+  Left "Completely fucked up"
 
 turboParse' :: String -> Move -> (Move, String)
 -- init move
