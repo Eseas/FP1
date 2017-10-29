@@ -1,25 +1,29 @@
 module Solver where
-import Data.List        -- elemIndex
-import Data.Sequence    -- update
-import Data.Foldable    -- toList
+
 import Parser
 import Matrixer
 
-m :: String
-m = "{\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\", \"prev\": {\"c\": {\"0\": 2, \"1\": 2}, \"v\": \"x\", \"id\": \"FLwNCvOVREEuQhWEMALIgzWo\", \"prev\": {\"c\": {\"0\": 0, \"1\": 0}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\"}}}"
+solve :: String -> Either String (Maybe (Int, Int, Char))
+solve msg =
+    case createMove msg of
+        Right (move, rest) ->
+            case Matrixer.fillMatrix move Matrixer.indices of
+                Right matrix ->
+                    case checkGameOver matrix of
+                        Right matrix1 ->
+                            case makeAMove matrix of
+                                Nothing ->
+                                    Right Nothing
+                                Just matrixMove ->
+                                    Right (Just matrixMove)
+                        Left errorMsg ->
+                            Left errorMsg
+                Left errorMsg ->
+                    Left errorMsg
 
-finalMove :: String -> Either String (Maybe (Int, Int, Char))
-finalMove msg =
-    Right (makeAMove matrix)
-    where
-        matrix = solve msg
-
-solve :: String -> [(Int, Int, Char)]
-solve message =
-    matrix
-    where
-        (move, rest) = createMove message
-        matrix = Matrixer.fillMatrix move Matrixer.indices
+                -- matrix = Matrixer.fillMatrix move Matrixer.indices
+        Left errorMsg ->
+            Left errorMsg
 
 makeAMove :: [(Int, Int, Char)] -> Maybe (Int, Int, Char)
 makeAMove [] = Nothing
