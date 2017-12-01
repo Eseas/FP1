@@ -1,5 +1,14 @@
 # notakto
 
+# Work plan
+1. Check requirements.
+    1. Use any package
+1. GET/POST requests in Haskell
+1. Find partner.
+
+# Risks and their management
+1. Check used modules with lecturer.
+
 Atom and haskell setup: https://github.com/simonmichael/haskell-atom-setup
 
 Test solution: https://stackoverflow.com/a/43264723
@@ -49,3 +58,8 @@ Content-Length: 49
 > {"mapName":"myMapName","mapURL":"http://tinypic.com/myimg"}
 
 json be masyvų
+
+# Initial HTTP testing in haskell
+stack ghci
+:l Client
+makePostRequest
