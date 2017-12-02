@@ -26,6 +26,11 @@ library
                      , network
                      , http-client >= 0.5.0
                      , http-conduit
+                     , http-client-tls
+                     , conduit-extra
+                     , aeson
+                     , yaml
+                     , conduit
                      , bytestring
                      , network-uri
                      , connection >= 0.2.5
