@@ -7,9 +7,33 @@ import qualified Data.ByteString.Lazy.Char8 as L8
 import qualified Data.Yaml             as Yaml
 import Network.HTTP.Simple
 import Solver
+import Entities
+
+defend :: String -> String -> IO ()
+defend gameName playerName = do
+  makeGetRequest
+  makePostRequest
+  --defend gameName playerName
+  --return expression
+  print "Done"
+
+convertBackToString :: Move -> [Char]
+convertBackToString Entities.Empty =
+    "end"
+convertBackToString move =
+  newAcc
+  where
+      newAcc = "{\"c\": {\"0\": " ++ show (x (point move)) ++ ", \"1\": " ++ show (y (point move)) ++ "}, \"v\": \"" ++ [symbol move] ++ "\", \"id\": \"" ++ (Entities.id move) ++ "\"" ++       case prev move of
+        Entities.Empty -> "}"
+        _ -> ", \"prev\": " ++ convertBackToString (prev move) ++ "}"
+      previousTurn = prev move
 
 makePostRequest :: IO ()
 makePostRequest = do
+
+
+makeGetRequest :: IO ()
+makeGetRequest = do
   --response <- httpLBS "http://httpbin.org/get"
   --response <- httpLBS "http://tictactoe.haskell.lt/game/yolo80/player/2"
 

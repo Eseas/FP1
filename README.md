@@ -5,7 +5,11 @@
     1. Use any package
 1. GET/POST requests in Haskell
 1. Find partner.
-1. Test telnet: is it single move passing or all moves?
+W
+1. Test telnet: is it single move passing or all moves? - ALL
+1. ToJSON - recursive Move with Points
+1. Modify solve to add new move
+1. pagrindine funcikja su argumentais: host url myid
 
 # Risks and their management
 1. Check used modules with lecturer.

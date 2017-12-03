@@ -23,7 +23,7 @@ fillMatrix move (acc, lastMove) =
         _ ->
             Left "ERROR: One cell has multiple moves."
     where
-        Entities.Point (x, y) = point move
+        Entities.Point x y = point move
         sym = symbol move
 
 changeElement idx newElem acc =

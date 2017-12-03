@@ -26,10 +26,10 @@ spec = do
                 `shouldBe` Right (Entities.Empty, "")
         it "parses move of 1 X" $ do
             createMove "{\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\"}"
-                `shouldBe` Right ((Move (Point (1,2)) 'x' "kbZzVrRPwiHsPkpQUUqpnkK" Entities.Empty), "")
+                `shouldBe` Right ((Move (Point 1 2) 'x' "kbZzVrRPwiHsPkpQUUqpnkK" Entities.Empty), "")
         it "creates a move of 2 Xs" $ do
             createMove "{\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\", \"prev\": {\"c\": {\"0\": 2, \"1\": 2}, \"v\": \"x\", \"id\": \"FLwNCvOVREEuQhWEMALIgzWo\"}}"
-                `shouldBe` Right ((Move (Point (1,2)) 'x' "kbZzVrRPwiHsPkpQUUqpnkK" (Move (Point (2,2)) 'x' "FLwNCvOVREEuQhWEMALIgzWo" Entities.Empty)), "")
+                `shouldBe` Right ((Move (Point 1 2) 'x' "kbZzVrRPwiHsPkpQUUqpnkK" (Move (Point 2 2) 'x' "FLwNCvOVREEuQhWEMALIgzWo" Entities.Empty)), "")
         -- it "creates a move of 2 Xs" $ do
         --     (createMove "{\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\", \"prev\": {\"c\": {\"0\": 2, \"1\": 2}, \"v\": \"x\", \"id\": \"FLwNCvOVREEuQhWEMALIgzWo\"}}")
         --         `shouldBe` Right ((Move (Point (1,2)) 'x' "kbZzVrRPwiHsPkpQUUqpnkK" (Move (Point (2,2)) 'x' "FLwNCvOVREEuQhWEMALIgzWo" Entities.Empty)), "")

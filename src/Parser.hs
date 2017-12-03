@@ -4,7 +4,7 @@ import Entities
 
 createMove :: String -> Either String (Move, String)
 createMove rest =
-    case parse rest (Move (Point (0,0)) 'e' "" Entities.Empty) of
+    case parse rest (Move (Point 0 0) 'e' "" Entities.Empty) of
         Right (move, rest1) -> Right (move, rest1)
         Left errorMsg       -> Left errorMsg
 
@@ -52,7 +52,7 @@ parsePoint ('{':rest) =
         Right (first, ',':' ':rest1) ->
             case parseInt rest1 of
                 Right (second, '}':',':' ':rest2) ->
-                    Right (Point (first, second), rest2)
+                    Right (Point first second, rest2)
                 Left errorMsg -> Left errorMsg
         Left errorMsg -> Left errorMsg
 
