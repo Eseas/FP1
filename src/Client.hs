@@ -30,7 +30,20 @@ convertBackToString move =
 
 makePostRequest :: IO ()
 makePostRequest = do
+  let request
+            = setRequestMethod "POST"
+            $ setRequestPath "/game/yolo84/player/2"
+            $ setRequestHost "tictactoe.haskell.lt"
+            $ setRequestHeader "Content-Type" ["application/json+map"]
+            $ setRequestBodyLBS "{\"c\": {\"0\": 0, \"1\": 0}, \"v\": \"x\", \"id\": \"Ljuss1\"}"
+            $ defaultRequest
+  response <- httpLBS request
 
+  putStrLn $ "The status code was: " ++
+             show (getResponseStatusCode response)
+  print $ getResponseHeader "Content-Type" response
+  -- S8.putStrLn $ Yaml.encode (getResponseBody response :: Value)
+  L8.putStrLn (getResponseBody response)
 
 makeGetRequest :: IO ()
 makeGetRequest = do
