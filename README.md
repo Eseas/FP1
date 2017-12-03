@@ -5,6 +5,7 @@
     1. Use any package
 1. GET/POST requests in Haskell
 1. Find partner.
+1. Test telnet: is it single move passing or all moves?
 
 # Risks and their management
 1. Check used modules with lecturer.

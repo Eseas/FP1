@@ -6,6 +6,7 @@ import qualified Data.ByteString.Char8 as S8
 import qualified Data.ByteString.Lazy.Char8 as L8
 import qualified Data.Yaml             as Yaml
 import Network.HTTP.Simple
+import Solver
 
 makePostRequest :: IO ()
 makePostRequest = do
@@ -36,6 +37,20 @@ makePostRequest = do
   print $ getResponseHeader "Content-Type" response
   -- S8.putStrLn $ Yaml.encode (getResponseBody response :: Value)
   L8.putStrLn (getResponseBody response)
+
+ -- good
+  -- let line = L8.unpack (getResponseBody response)
+  -- putStrLn line
+  -- case Solver.solve line of
+  --   Left e -> putStrLn "Solve unsuccessful"
+  --   Right e -> Just
+  -- let solverMsg = Solver.solve line
+  -- putStrLn solverMsg
+-- end good
+
+  -- case getResponseStatusCode response of
+  --   200 -> putStrLn "good answer"
+  --   _ -> putStrLn "wrong answer"
   --         -- $ setRequestHeader "Accept" ["application/json+map"]
   --         -- $ setRequestPort 80
   -- response <- httpJSON request
@@ -46,3 +61,6 @@ makePostRequest = do
 
   --print $ getResponseHeader "Content-Type" response
   --L8.putStrLn $ getResponseBody response
+
+
+  -- {"c": {"0": 1, "1": 1}, "v": "x", "id": "Ljuss2", "prev": {"c": {"0": 0, "1": 0}, "v": "x", "id": "Ljuss1"}}

@@ -7,11 +7,11 @@ solve :: String -> Either String (Maybe (Int, Int, Char))
 solve msg =
     case createMove msg of
         Right (move, rest) ->
-            case Matrixer.fillMatrix move Matrixer.indices of
-                Right matrix ->
+            case Matrixer.fillMatrix move (Matrixer.indices, (-1, -1, ' ')) of
+                Right (matrix, lastMove) ->
                     case checkGameOver matrix of
                         Right matrix1 ->
-                            case makeAMove matrix of
+                            case makeAMove2 (matrix, lastMove) of
                                 Nothing ->
                                     Right Nothing
                                 Just matrixMove ->
@@ -32,40 +32,37 @@ makeAMove (elem:restElem) =
         (x, y, ' ') -> Just (x, y, 'x')
         _ -> makeAMove restElem
 
-makeAMove2 matrix (lx, ly, 'x')
-  case uzimtasOrOutside(lx + 1, ly + 2) of
-    Right (x, y, 'x') -> Just (x,y,'x')
-    Left e -> case checkIfFreeAndInside(lx + 2, ly + 1) of
-      Right (x, y, 'x') -> Just (x,y,'x')
-      Left e -> case uzimtasOrOutside(lx - 1, ly + 2) of
-              Right (x, y, 'x') -> Just (x,y,'x')
-              Left e -> case uzimtasOrOutside(lx - 2, ly + 1) of
-                      Right (x, y, 'x') -> Just (x,y,'x')
-                      Left e -> case uzimtasOrOutside(lx - 2, ly - 1) of
-                              Right (x, y, 'x') -> Just (x,y,'x')
-                              Left e -> case uzimtasOrOutside(lx - 1, ly - 2) of
-                                      Right (x, y, 'x') -> Just (x,y,'x')
-                                      Left e -> makeAMoveWhereNoLoss
-                                              no
-                                              yes -> "Javla"
-
-checkIfFreeAndInside :: [(Int, Int, Char)] -> Either String (Int, Int, Char)
-checkIfFreeAndInside matrix (x, y, sym)
-  | (x <= 2) && (x >= 0) && (y <= 2) && (y >= 0) = Left "Outside"
-  | otherwise = case position (x, y, sym) matrix
-                  -1 -> Left "Occupied"
-                  _ -> Right (x, y, sym)
+makeAMove2 :: ([(Int, Int, Char)], (Int, Int, Char)) -> Maybe (Int, Int, Char)
+makeAMove2 (matrix, (lx, ly, lsym)) =
+  case checkIfFreeAndInside matrix (lx + 1, ly + 2, lsym) of
+    Right (x, y, lsym) -> Just (x,y,lsym)
+    Left e -> case checkIfFreeAndInside matrix (lx + 2, ly + 1, lsym) of
+      Right (x, y, lsym) -> Just (x,y,lsym)
+      Left e -> case checkIfFreeAndInside matrix (lx - 1, ly + 2, lsym) of
+              Right (x, y, lsym) -> Just (x,y,lsym)
+              Left e -> case checkIfFreeAndInside matrix (lx - 2, ly + 1, lsym) of
+                      Right (x, y, lsym) -> Just (x,y,lsym)
+                      Left e -> case checkIfFreeAndInside matrix (lx - 2, ly - 1, lsym) of
+                              Right (x, y, lsym) -> Just (x,y,lsym)
+                              Left e -> case checkIfFreeAndInside matrix (lx - 1, ly - 2, lsym) of
+                                      Right (x, y, lsym) -> Just (x,y,lsym)
+                                      Left e -> case checkIfFreeAndInside matrix (lx + 1, ly - 2, lsym) of
+                                              Right (x, y, lsym) -> Just (x,y,lsym)
+                                              Left e -> case makeAMoveWhereNoLoss matrix matrix of
+                                                      Just (x, y, sym) -> Just (x, y, sym)
+                                                      Nothing -> makeAMove matrix
 
 makeAMoveWhereNoLoss :: [(Int, Int, Char)] -> [(Int, Int, Char)] -> Maybe (Int, Int, Char)
-makeAMove [] matrix = Nothing
+makeAMoveWhereNoLoss [] matrix = Nothing
 makeAMoveWhereNoLoss (elem:restElem) matrix =
     case elem of
         (x, y, ' ') ->
           case position (x, y, ' ') matrix of
             -1 -> Nothing
             idx ->
-              newAcc = changeElement idx (x,y, 'x') matrix
-              case checkGameOver matrix of
-                Right matrix -> Just (x, y, 'x')
+              case checkGameOver newAcc of
+                Right newAcc -> Just (x, y, 'x')
                 Left e -> makeAMoveWhereNoLoss restElem matrix
+              where
+                newAcc = changeElement idx (x,y, 'x') matrix
         (x, y, 'x') -> makeAMoveWhereNoLoss restElem matrix
