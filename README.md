@@ -25,7 +25,7 @@ Test solution: https://stackoverflow.com/a/43264723
 telnet tictactoe.haskell.lt 80
 
 # 1
-POST /game/yolo80/player/1 HTTP/1.1
+POST /game/yolo88/player/1 HTTP/1.1
 Host: tictactoe.haskell.lt:80
 Content-Type: application/json+map
 Content-Length: 49
