@@ -20,7 +20,6 @@ solve msg =
                             Left errorMsg
                 Left errorMsg ->
                     Left errorMsg
-
                 -- matrix = Matrixer.fillMatrix move Matrixer.indices
         Left errorMsg ->
             Left errorMsg
@@ -33,6 +32,8 @@ makeAMove (elem:restElem) =
         _ -> makeAMove restElem
 
 makeAMove2 :: ([(Int, Int, Char)], (Int, Int, Char)) -> Maybe (Int, Int, Char)
+makeAMove2 (matrix, (-1,-1,' ')) =
+  Just (1,1,'x')
 makeAMove2 (matrix, (lx, ly, lsym)) =
   case checkIfFreeAndInside matrix (lx + 1, ly + 2, lsym) of
     Right (x, y, lsym) -> Just (x,y,lsym)

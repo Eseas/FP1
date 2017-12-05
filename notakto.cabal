@@ -28,6 +28,7 @@ library
                      , http-client-tls
                      , http-conduit
                      , conduit-extra
+                     , ansi-terminal
                      , aeson
                      , yaml
                      , conduit

@@ -29,7 +29,7 @@ spec = do
                 `shouldBe` Right (Just (1,0,'x'))
         it "Does not fail crash with 0 moves" $ do
             solve "{}"
-                `shouldBe` Right (Just (0,0,'x'))
+                `shouldBe` Right (Just (1,1,'x'))
         it "Detects multiple moves to a single cell" $ do
             solve "{\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\", \"prev\": {\"c\": {\"0\": 2, \"1\": 2}, \"v\": \"x\", \"id\": \"FLwNCvOVREEuQhWEMALIgzWo\", \"prev\": {\"c\": {\"0\": 1, \"1\": 2}, \"v\": \"x\", \"id\": \"kbZzVrRPwiHsPkpQUUqpnkK\"}}}"
                 `shouldBe` Left "ERROR: One cell has multiple moves."

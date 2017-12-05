@@ -8,85 +8,103 @@ import qualified Data.Yaml             as Yaml
 import Network.HTTP.Simple
 import Solver
 import Entities
+import System.Console.ANSI
+
+attack :: String -> String -> IO ()
+attack gameName playerName = do
+  putStrLn "~~~~~~~~~~~~~~~~~ GAME begin: ATTACK ~~~~~~~~~~~~~~~~~"
+  run "attack" gameName playerName
+  putStrLn "~~~~~~~~~~~~~~~~~ GAME over : ATTACK ~~~~~~~~~~~~~~~~~"
 
 defend :: String -> String -> IO ()
 defend gameName playerName = do
-  origMsg <- makeGetRequest
-  makePostRequest origMsg
-  --defend gameName playerName
-  --return expression
-  print "Done"
+  putStrLn "~~~~~~~~~~~~~~~~~ GAME begin: DEFEND ~~~~~~~~~~~~~~~~~"
+  run "defend" gameName playerName
+  putStrLn "~~~~~~~~~~~~~~~~~ GAME begin: DEFEND ~~~~~~~~~~~~~~~~~"
 
-convertBackToString :: Move -> [Char]
-convertBackToString Entities.Empty =
-    "end"
-convertBackToString move =
-  newAcc
-  where
-      newAcc = "{\"c\": {\"0\": " ++ show (x (point move)) ++ ", \"1\": " ++ show (y (point move)) ++ "}, \"v\": \"" ++ [symbol move] ++ "\", \"id\": \"" ++ (Entities.id move) ++ "\"" ++       case prev move of
-        Entities.Empty -> "}"
-        _ -> ", \"prev\": " ++ convertBackToString (prev move) ++ "}"
-      previousTurn = prev move
+run :: String -> String -> String -> IO ()
+run mode gameName playerName = do
+  origMsg <- case mode of
+    "attack" -> return "{}"
+    "defend" -> makeGetRequest gameName playerName
+  case Solver.solve origMsg of
+    Left "ERROR: Game already over." -> do
+      setSGR [SetColor Foreground Vivid Green]
+      putStrLn "Congratulations, Kazimieras robot won!"
+      setSGR [Reset]
+    Left errorMsg -> do
+      setSGR [SetColor Foreground Vivid Red]
+      putStrLn errorMsg
+      setSGR [Reset]
+    Right (Just (x,y,sym)) -> do
+      makePostRequest newMsg gameName playerName
+      run "defend" gameName playerName
+      where
+        newMsg = concatToMoveString origMsg (x,y,sym) playerName
+
 
 concatToMoveString :: [Char] -> (Int, Int, Char) -> String -> [Char]
 concatToMoveString oldMsg (x,y,sym) playerName =
   newMsg
   where
-    newMsg = "{\"c\": {\"0\": " ++ show x ++ ", \"1\": " ++ show y ++ "}, \"v\": \"" ++ [sym] ++ "\", \"id\": \"" ++ playerName ++ "\"" ++ ", \"prev\": " ++ oldMsg ++ "}"
+    newMsg = "{\"c\": {\"0\": " ++ show x ++ ", \"1\": " ++ show y ++ "}, \"v\": \"" ++ [sym] ++ "\", \"id\": \"" ++ playerName ++ "\"" ++ case oldMsg of
+      "{}" -> "}"
+      _ -> ", \"prev\": " ++ oldMsg ++ "}"
 
-makePostRequest :: String -> IO ()
-makePostRequest origMsg = do
-  case Solver.solve origMsg of
-    Left e -> putStrLn "Solve unsuccessful"
-    Right (Just (x,y,sym)) ->
-      let request
+makePostRequest :: String -> String -> String -> IO (Either String String)
+makePostRequest msg gameName playerName = do
+  putStrLn "------------- POST begin -------------"
+  let request
             = setRequestMethod "POST"
-            $ setRequestPath "/game/yolo84/player/2"
+            $ setRequestPath (S8.pack ("/game/" ++ gameName ++ "/player/" ++ playerName))
             $ setRequestHost "tictactoe.haskell.lt"
             $ setRequestHeader "Content-Type" ["application/json+map"]
-            $ setRequestBodyLBS (concatToMoveString origMsg (x,y,sym) "2")
+            $ setRequestBodyLBS (L8.pack (msg))
             $ defaultRequest
-            response <- httpLBS request
+  response <- httpLBS request
 
-  putStrLn $ "The status code was: " ++
-             show (getResponseStatusCode response)
+  case (getResponseStatusCode response) of
+    200 -> do
+      setSGR [SetColor Foreground Vivid Green]
+      putStrLn ("POST: status: " ++
+             show (getResponseStatusCode response))
+      setSGR [Reset]
+    _ -> do
+      setSGR [SetColor Foreground Vivid Red]
+      putStrLn ("POST: status: " ++
+             show (getResponseStatusCode response))
+      setSGR [Reset]
   print $ getResponseHeader "Content-Type" response
-  -- S8.putStrLn $ Yaml.encode (getResponseBody response :: Value)
   L8.putStrLn (getResponseBody response)
+  putStrLn ("Message: " ++ msg)
+  putStrLn "------------- POST end -------------\n"
+  return (Right "ok")
 
 
-makeGetRequest :: IO String
-makeGetRequest = do
+makeGetRequest :: String -> String -> IO String
+makeGetRequest gameName playerName = do
+  putStrLn "------------- GET begin -------------"
   let request
-            = setRequestPath "/game/yolo88/player/2"
+            = setRequestPath (S8.pack ("/game/" ++ gameName ++ "/player/" ++ playerName))
             $ setRequestHost "tictactoe.haskell.lt"
             $ setRequestHeader "Accept" ["application/json+map"]
             $ defaultRequest
   response <- httpLBS request
 
-  putStrLn $ "The status code was: " ++
-             show (getResponseStatusCode response)
+  case (getResponseStatusCode response) of
+    200 -> do
+      setSGR [SetColor Foreground Vivid Green]
+      putStrLn ("GET: status: " ++
+             show (getResponseStatusCode response))
+      setSGR [Reset]
+    _ -> do
+      setSGR [SetColor Foreground Vivid Red]
+      putStrLn ("GET: status: " ++
+             show (getResponseStatusCode response))
+      setSGR [Reset]
   print $ getResponseHeader "Content-Type" response
-  -- S8.putStrLn $ Yaml.encode (getResponseBody response :: Value)
-  L8.putStrLn (getResponseBody response)
 
   let line = L8.unpack (getResponseBody response)
-  putStrLn ("unpacked value: " ++ line)
+  putStrLn ("Message: " ++ line)
+  putStrLn "------------- GET end -------------\n"
   return line
-
-  -- case getResponseStatusCode response of
-  --   200 -> putStrLn "good answer"
-  --   _ -> putStrLn "wrong answer"
-  --         -- $ setRequestHeader "Accept" ["application/json+map"]
-  --         -- $ setRequestPort 80
-  -- response <- httpJSON request
-  --
-  -- putStrLn $ "The status code was: " ++
-  --            show (getResponseStatusCode response)
--- end good
-
-  --print $ getResponseHeader "Content-Type" response
-  --L8.putStrLn $ getResponseBody response
-
-
-  -- {"c": {"0": 1, "1": 1}, "v": "x", "id": "Ljuss2", "prev": {"c": {"0": 0, "1": 0}, "v": "x", "id": "Ljuss1"}}

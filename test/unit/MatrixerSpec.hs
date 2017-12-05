@@ -32,3 +32,6 @@ spec = do
         it "Determines whether the game would be over on bad move" $ do
           checkGameOverOnMove  [(0,0,'x'),(1,0,' '),(2,0,' '),(0,1,' '),(1,1,' '),(2,1,' '),(0,2,' '),(1,2,' '),(2,2,'x')] (1,1,'x')
                 `shouldBe` Left "ERROR: Game already over."
+        it "Does not fill when move is empty" $ do
+          Matrixer.fillMatrix Entities.Empty (Matrixer.indices, (-1, -1, ' '))
+                `shouldBe` Right (Matrixer.indices, (-1,-1,' '))
