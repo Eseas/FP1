@@ -1,12 +1,12 @@
 name:                notakto
-version:             0.1.0.0
+version:             0.2.0.0
 -- synopsis:
 -- description:
 homepage:            https://github.com/githubuser/notakto#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Kazimieras Senvaitis
-maintainer:          example@example.com
+maintainer:          kazimieras.senvaitis@gmail.com
 copyright:           2017 Kazimieras Senvaitis
 category:            Web
 build-type:          Simple
@@ -22,20 +22,9 @@ library
                      , Client
   build-depends:       base >= 4.7 && < 5
                      , containers
-                     , HTTP
-                     , network
-                     , http-client >= 0.5.0
-                     , http-client-tls
                      , http-conduit
-                     , conduit-extra
                      , ansi-terminal
-                     , aeson
-                     , yaml
-                     , conduit
                      , bytestring
-                     , network-uri
-                     , connection >= 0.2.5
-                     , http-types
   default-language:    Haskell2010
 
 executable notakto-exe
