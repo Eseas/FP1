@@ -49,7 +49,7 @@ concatToMoveString oldMsg (x,y,sym) playerName =
       "{}" -> "}"
       _ -> ", \"prev\": " ++ oldMsg ++ "}"
 
-makePostRequest :: String -> String -> String -> IO (Either String String)
+makePostRequest :: String -> String -> String -> IO ()
 makePostRequest msg gameName playerName = do
   putStrLn "------------- POST begin -------------"
   let request
@@ -76,7 +76,6 @@ makePostRequest msg gameName playerName = do
   L8.putStrLn (getResponseBody response)
   putStrLn ("Message: " ++ msg)
   putStrLn "------------- POST end -------------\n"
-  return (Right "ok")
 
 
 makeGetRequest :: String -> String -> IO String
